@@ -41,7 +41,13 @@
         <form class="form-inline">
           <!-- グリッドシステムを利用した幅の定義。参考 https://getbootstrap.jp/docs/4.5/layout/grid/ -->
           <div class="form-group md-6 sm-5 mt-4 mb-4 mr-2 col-xs-10">
-            <input type="text" class="form-control" placeholder="食材を入力" id='taskNameForAdd'>
+            <input type="text" class="form-control" placeholder="食材を入力" id='foodNameForAdd'>
+          </div>
+          <div class="form-group md-6 sm-5 mt-4 mb-4 mr-2 col-xs-10">
+            <input type="date" class="form-control" placeholder="賞味期限を入力" id='FoodTasteDateForAdd'>
+          </div>
+          <div class="form-group md-6 sm-5 mt-4 mb-4 mr-2 col-xs-10">
+            <input type="date" class="form-control" placeholder="消費期限を入力" id='FoodConsumptionDateForAdd'>
           </div>
           <div class="form-group md-6 sm-5 mt-4 mb-4 mr-2">
             <button type="button" class="btn btn-primary" id="addBtn" onclick="add()">Add</button>
@@ -80,10 +86,16 @@
   <script>
 // タスクを追加する
 function add(){
-  let taskNameForAdd = $("#taskNameForAdd").val(); // inputbox に入力された値を取得する
-  if (taskNameForAdd == "") return; // もし、inputbox が空だった場合は関数を終了する
+  let foodNameForAdd = $("#foodNameForAdd").val(); // inputbox (食材)に入力された値を取得する
+  let FoodTasteDateForAdd = $("#FoodTasteDateForAdd").val(); // (賞味期限)inputbox に入力された値を取得する
+  let FoodConsumptionDateForAdd = $("#FoodConsumptionDateForAdd").val(); // (消費期限)inputbox に入力された値を取得する
+  if (foodNameForAdd == "") return; // もし、inputbox が空だった場合は関数を終了する
   create_at = new Date() // 現在時刻
-  $("#taskNameForAdd").val(''); // inputbox に入力された値を空にする
+  var str = String(create_at);
+  var newTime = str.replace("GMT+0900 (JST)", "");
+  $("#foodNameForAdd").val(''); // inputbox (食材)に入力された値を空にする
+  $("#FoodTasteDateForAdd").val(''); // inputbox (賞味期限)に入力された値を空にする
+  $("#FoodConsumptionDateForAdd").val(''); // inputbox (消費期限)に入力された値を空にする
   num = 0;
   status = false;
   $('#list').append(' \
@@ -93,11 +105,11 @@ function add(){
 	            <div class="custom-control custom-checkbox"> \
 	              <input type="checkbox" class="custom-control-input" id="customCheck' + num + '" ' + status + ' onclick="check(this);"> \
 	              <label class="custom-control-label" for="customCheck' + num + '"> \
-	                <p>' + taskNameForAdd + '\
+	                <p>' + foodNameForAdd +"  "+ FoodTasteDateForAdd +"  "+ FoodConsumptionDateForAdd + '\
 	                  [<a data-toggle="modal" data-target="#editModal" onclick="showEditModal(this)"> <span class="fontBlue">edit</span> </a>] \
 	                  [<a data-toggle="modal" data-target="#editModal" onclick="showDeleteModal(this)"> <span class="fontRed">x</span> </a>] \
 	                </p> \
-	                <p>' + create_at + '</p> \
+	                <p>' +"入力日："+ newTime + '</p> \
 	              </label> \
 	            </div> \
 	          </form> \
@@ -119,16 +131,19 @@ function del(){
 }
 // タスクを更新する
 function update(){
-  let taskNameForEdit = $("#taskNameForEdit").val(); // inputbox に入力された値を取得する
+  let taskNameForEdit = $("#taskNameForEdit").val(); // inputbox (食材)に入力された値を取得する
+  let FoodTasteDateForAdd = $("#FoodTasteDateForAdd").val(); // inputbox (賞味期限)に入力された値を取得する
   if (taskNameForEdit == "") return; //　もし、inputbox が空だった場合は関数を終了する
   collection = db.collection("tasks").doc($('#docId').val()).update({ // $('#docId').val() で削除する対象データのIDを取得し、そのデータに対して更新を行う
-    name: taskNameForEdit, // 入力されたタスク名
+    name: taskNameForEdit, // 入力された食材名
+    date1: FoodTasteDateForAdd //入力された賞味期限 
   }).then(function() { // 成功した場合に実行される箇所
       console.log("Document successfully updated!");
       $('#list').text = "" // タスクをリスト表示するための箇所（<div id="list"></div>）を空文字に設定（初期化）
       $("#editModal").modal('toggle'); // Modal の表示を OFF にする
       getAll(); // 保持されている全てのタスクデータを取得し、表示する
       $("#taskNameForEdit").val(''); // inputbox に入力された値を空にする
+      $("#FoodTasteDateForAdd").val(''); // inputbox に入力された値を空にする
   }).catch(function(error) { // 失敗した場合に実行される箇所
       console.error("Error removing document: ", error);
   });
